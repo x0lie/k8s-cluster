@@ -8,6 +8,7 @@ data:
     import os
     import time
     import json
+    import shutil  # For safe recursive deletion
     print("Starting trim script")
 
     # Connect to qBittorrent
@@ -18,14 +19,14 @@ data:
     else:
         raise ValueError("QBT_USER and QBT_PASS env vars must be set")
 
-    # Constants
+    # Constants (unchanged)
     MIN_RATIO = 1.1
     MIN_SEEDING_HOURS = 337
     MAX_SEEDERS = 15
     IPT_TAG = 'iptorrents'
-    DRY_RUN = False  # Set to False to actually delete
+    DRY_RUN = False
 
-    # History file for tracking per-torrent snapshots
+    # History file (unchanged)
     history_file = '/downloads/seeder_history.json'
     try:
         with open(history_file, 'r') as f:
@@ -35,11 +36,12 @@ data:
 
     current_ts = time.time()
 
-    # Get all seeding torrents for IPT tag
+    # Get seeding torrents (unchanged)
     torrents = client.torrents_info(status_filter='seeding', tag=IPT_TAG)
 
-    # Prepare data for each torrent
+    # Prepare data (unchanged, but add content_path)
     torrent_data = []
+    torrent_paths = {}  # Store paths for later deletion
     for t in torrents:
         h = t.hash
         current_up = t.uploaded
@@ -54,13 +56,14 @@ data:
                     delta_up = current_up - entry['up']
                     delta_st = current_st - entry['st']
                     break
-        prod_hours = max(delta_st / 3600.0, 1e-6)  # Avoid div0
+        prod_hours = max(delta_st / 3600.0, 1e-6)
         productivity = (delta_up / 1e9) / prod_hours
         seeding_hours = current_st / 3600.0
         is_eligible = t.ratio >= MIN_RATIO or seeding_hours >= MIN_SEEDING_HOURS
         torrent_data.append((productivity, is_eligible, h, t.name, seeding_hours, t.ratio, t.category))
+        torrent_paths[h] = t.content_path  # Capture path for manual delete
 
-    # Update history with current snapshots (after processing)
+    # Update history (unchanged)
     new_history = {}
     for t in torrents:
         h = t.hash
@@ -69,7 +72,6 @@ data:
         if h in history:
             new_history[h] = history[h][:]
         new_history[h].append({'ts': current_ts, 'up': t.uploaded, 'st': t.seeding_time})
-        # Prune old entries (keep ~5 days for buffer)
         hist_list = sorted(new_history[h], key=lambda x: x['ts'])
         prune_ts = current_ts - 5 * 86400
         hist_list = [e for e in hist_list if e['ts'] >= prune_ts]
@@ -84,7 +86,6 @@ data:
     print("-" * 80)
     print(f"{'Name':<50} {'Prod (GB/h)':<12} {'Hours':<8} {'Ratio':<6} {'Eligible'}")
     print("-" * 80)
-    # Sort by productivity descending for nicer print (highest first)
     sorted_for_print = sorted(torrent_data, key=lambda x: x[0], reverse=True)
     for prod, eligible, hash_val, name, hours, ratio, category in sorted_for_print:
         print(f"{name[:49]:<50} {prod:<12.4f} {hours:<8.1f} {ratio:<6.3f} {eligible}")
@@ -95,10 +96,7 @@ data:
         excess = total - MAX_SEEDERS
         print(f"\nExcess torrents: {excess}. Identifying candidates for deletion...")
 
-        # Sort by productivity ascending (least productive first)
         sorted_torrents = sorted(torrent_data, key=lambda x: x[0])
-
-        # Candidates are the least productive 'excess' torrents
         candidates = sorted_torrents[:excess]
         to_delete = []
         for prod, eligible, hash_val, name, hours, ratio, category in candidates:
@@ -113,15 +111,26 @@ data:
             print("-" * 60)
             print(f"{'Name':<50} {'Prod (GB/h)'}")
             print("-" * 60)
-            for hash_val, name, prod, category in sorted(to_delete, key=lambda x: x[2]):  # sort by prod asc for display
+            for hash_val, name, prod, category in sorted(to_delete, key=lambda x: x[2]):
+                path = torrent_paths.get(hash_val)
                 if DRY_RUN:
-                    print(f"Would delete: {name[:49]:<50} {prod:<12.4f}")
+                    print(f"Would delete: {name[:49]:<50} {prod:<12.4f} | Path: {path}")
                 else:
-                    delete_files = category != "manual"
-                    action = "Deleting (with files)" if delete_files else "Deleting (keep files)"
-                    print(f"{action}: {name[:49]:<50} {prod:<12.4f}")
-                    client.torrents_delete(delete_local_files=delete_files, torrent_hashes=hash_val)
-                    time.sleep(1)  # Avoid API flood
+                    # Remove torrent from qBittorrent (keep files for now)
+                    print(f"Removing torrent: {name[:49]:<50} {prod:<12.4f}")
+                    client.torrents_delete(delete_local_files=False, torrent_hashes=hash_val)
+                    time.sleep(1)
+
+                    # Manual file deletion if not manual category
+                    if category != "manual" and path and os.path.exists(path):
+                        action = "Manually deleting files at"
+                        print(f"{action}: {path}")
+                        if os.path.isfile(path):
+                            os.remove(path)
+                        elif os.path.isdir(path):
+                            shutil.rmtree(path)  # Recursive delete for dirs
+                    else:
+                        print(f"Skipping file delete for manual category or invalid path: {path}")
         else:
             print(f"\nNo eligible candidates among the {excess} least productive torrents; no deletions.")
 

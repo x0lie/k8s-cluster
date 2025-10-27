@@ -144,9 +144,10 @@ spec:
               - sh
               - -c
               - |
-                pip install qbittorrent-api && python /config/trim_seeders.py
+                pip install --user qbittorrent-api && python /config/trim_seeders.py
             env:
               TZ: ${TIMEZONE}
+              HOME: /tmp  # Writable for --user install
             envFrom:
               - secretRef:
                   name: qbittorrent-login
@@ -156,14 +157,8 @@ spec:
             resources: *resources
             securityContext:
               <<: *securityContext
-              readOnlyRootFilesystem: false  # Allow pip writes
-        pod:
-          automountServiceAccountToken: false
-          securityContext:
-            runAsGroup: 0  # Root group
-            runAsNonRoot: false  # Allow root
-            runAsUser: 0  # Run as root for pip
-            seccompProfile: { type: RuntimeDefault }
+              readOnlyRootFilesystem: false
+        pod: *podSecurityContext
 
     persistence:
       config-dir:
