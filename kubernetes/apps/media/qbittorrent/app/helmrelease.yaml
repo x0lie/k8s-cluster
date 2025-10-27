@@ -45,7 +45,7 @@ spec:
           pia-tun:
             image:
               repository: olsonalexw/k8s-wireguard-pia
-              tag: latest@sha256:f34c3bc21c5dee3fe05bb7a83d2ad680a1f30d513a06b0addf25aa60ff0392ed
+              tag: latest@sha256:92b513fd617cea4a3b4ff8c8ebb0c91f41542a5fda750599f38d658aad48bb8b
               pullPolicy: Always
             env:
               TZ: ${TIMEZONE}
