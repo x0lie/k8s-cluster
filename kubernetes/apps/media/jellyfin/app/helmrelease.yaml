@@ -73,6 +73,7 @@ spec:
     persistence:
       config:
         enabled: true
+        type: persistentVolumeClaim
         storageClass: nfs-csi          # Dynamic PVC in /kubernetes/appdata
         accessMode: ReadWriteMany
         size: 2Gi
