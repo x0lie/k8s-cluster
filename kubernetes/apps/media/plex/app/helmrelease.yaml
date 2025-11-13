@@ -26,10 +26,12 @@ spec:
         containers:
           main:
             image:
-              repository: plexinc/pms-docker
+              repository: linuxserver/plex
               tag: latest
             env:
               TZ: ${TIMEZONE}
+              PUID: "1001"
+              PGID: "1001"
             resources:
               requests:
                 cpu: 49m
@@ -45,11 +47,10 @@ spec:
     ingress:
       main:
         enabled: true
-        className: traefik-external
+        className: traefik-internal
         annotations:
-          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "network-chain-no-auth@kubernetescrd"
+          traefik.ingress.kubernetes.io/router.middlewares: "network-chain-no-auth-restrict-networks@kubernetescrd"
         hosts:
           - host: &host "plex.${SECRET_DOMAIN}"
             paths:
