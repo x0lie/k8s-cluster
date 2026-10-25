@@ -16,7 +16,7 @@ spec:
         name: bjw-s
         namespace: flux-system
   dependsOn:
-    - name: nvidia-device-plugin
+    - name: generic-device-plugin
       namespace: kube-system
   values:
     controllers:
@@ -32,16 +32,14 @@ spec:
               TZ: ${TIMEZONE}
               PUID: "1001"
               PGID: "1001"
-              NVIDIA_VISIBLE_DEVICES: all
-              NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
             resources:
               requests:
                 cpu: 49m
                 memory: 2048M
-                nvidia.com/gpu: 1
+                squat.ai/dri: 1
               limits:
                 memory: 4046M
-                nvidia.com/gpu: 1
+                squat.ai/dri: 1
 
     service:
       main:
@@ -63,9 +61,8 @@ spec:
         type: emptyDir
 
     defaultPodOptions:
-      runtimeClassName: nvidia
       nodeSelector:
-        nvidia.feature.node.kubernetes.io/gpu: "true"
+        intel.feature.node.kubernetes.io/gpu: "true"
       enableServiceLinks: false
       securityContext:
         runAsNonRoot: true

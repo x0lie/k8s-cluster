@@ -16,3 +16,9 @@ data:
       #   groups:
       #     - paths:
       #         - path: /dev/apex_0
+
+      - name: dri
+        groups:
+          - count: 10
+            paths:
+              - path: /dev/dri
