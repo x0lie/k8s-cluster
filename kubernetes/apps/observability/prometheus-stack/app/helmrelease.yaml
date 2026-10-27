@@ -7,6 +7,10 @@ spec:
     kind: OCIRepository
     name: kube-prometheus-stack
   interval: 1h
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   valuesFrom:
     - kind: Secret
       name: grafana
@@ -44,7 +48,6 @@ spec:
     prometheus:
       prometheusSpec:
         externalUrl: https://prometheus.${SECRET_DOMAIN}
-        version: v2.55.1 # override 'unsupported Prometheus version' error
         securityContext:
           runAsNonRoot: true
           runAsUser: 64535
