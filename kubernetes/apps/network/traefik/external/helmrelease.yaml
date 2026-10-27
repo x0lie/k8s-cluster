@@ -35,9 +35,8 @@ spec:
     env:
       - name: TZ
         value: "${TIMEZONE}"
-    logs:
-      access:
-        enabled: true
+    accessLog:
+      enabled: true
     ingressRoute:
       dashboard:
         enabled: true

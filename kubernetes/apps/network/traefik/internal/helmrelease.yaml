@@ -33,9 +33,8 @@ spec:
     env:
       - name: TZ
         value: "${TIMEZONE}"
-    logs:
-      access:
-        enabled: true
+    accessLog:
+      enabled: true
     ingressClass:
       isDefaultClass: false
       name: traefik-internal
