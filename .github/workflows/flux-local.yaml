@@ -76,17 +76,15 @@ jobs:
         id: diff
         run: |
           cat diff.patch
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          cat diff.patch >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          if [ -s diff.patch ]; then
+            { echo '```diff'; head -c 60000 diff.patch; echo; echo '```'; } > comment.md
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+          fi
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ steps.diff.outputs.has_diff == 'true' }}
         name: Add comment
         uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3
         with:
           message-id: "${{ github.event.pull_request.number }}/${{ matrix.paths }}/${{ matrix.resources }}"
           message-failure: Diff was not successful
-          message: |
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+          message-path: comment.md
