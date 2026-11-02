@@ -35,7 +35,7 @@ spec:
       image:
         registry: registry.k8s.io
         repository: kubectl
-        tag: v1.37.1
+        tag: v1.37.2
     openebs-crds:
       csi:
         volumeSnapshots:
