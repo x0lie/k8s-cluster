@@ -90,7 +90,6 @@ spec:
         pod: &podSecurityContext
           automountServiceAccountToken: false
           securityContext:
-            fsGroup: 1001  # Ensure volume files are group-writable by 1001
             runAsGroup: 1001
             runAsNonRoot: true
             runAsUser: 1001

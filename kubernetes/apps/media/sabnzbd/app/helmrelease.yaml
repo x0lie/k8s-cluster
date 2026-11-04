@@ -98,7 +98,3 @@ spec:
         existingClaim: nfs-media-pvc   # Uses static PVC for /kubernetes/media
       tmp:
         type: emptyDir
-    defaultPodOptions:
-      securityContext:
-        fsGroup: 1001
-        fsGroupChangePolicy: "Always"

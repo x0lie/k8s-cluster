@@ -19,12 +19,6 @@ spec:
       qbittorrent:
         annotations:
           secret.reloader.stakater.com/reload: qbittorrent-pia
-
-        pod:
-          securityContext:
-            fsGroup: 1001
-            fsGroupChangePolicy: "OnRootMismatch"
-
         containers:
           pia-tun:
             image:
