@@ -27,7 +27,7 @@ spec:
           main:
             image:
               repository: linuxserver/plex
-              tag: 1.43.5@sha256:8f655bad7dcbc5398a78f70a5af12600b4ed3424f901566ed1eaa6710e9e2334
+              tag: 1.43.5@sha256:9a1325bf0b34a50993a04be0bdcc7fab841d2a78161bd11b4db4ff8478a7ac2a
             env:
               TZ: ${TIMEZONE}
               PUID: "1001"
