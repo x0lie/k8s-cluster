@@ -58,8 +58,8 @@ spec:
       hostname: k8s-notifiarr
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
+        runAsUser: 10000
+        runAsGroup: 10000
         seccompProfile: { type: RuntimeDefault }
 
     service:

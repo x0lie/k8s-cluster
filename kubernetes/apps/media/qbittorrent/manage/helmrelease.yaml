@@ -90,9 +90,9 @@ spec:
         pod: &podSecurityContext
           automountServiceAccountToken: false
           securityContext:
-            runAsGroup: 1001
+            runAsGroup: 10000
             runAsNonRoot: true
-            runAsUser: 1001
+            runAsUser: 10000
             seccompProfile: { type: RuntimeDefault }
 
     persistence:

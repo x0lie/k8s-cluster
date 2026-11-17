@@ -26,7 +26,7 @@ spec:
       enabled: true
       alertmanagerSpec:
         securityContext:
-          fsGroup: 1001
+          fsGroup: 10000
           fsGroupChangePolicy: OnRootMismatch
         externalUrl: https://alertmanager.${SECRET_DOMAIN}
         # alertmanagerConfiguration:
@@ -53,9 +53,9 @@ spec:
         externalUrl: https://prometheus.${SECRET_DOMAIN}
         securityContext:
           runAsNonRoot: true
-          runAsUser: 1001
-          runAsGroup: 1001
-          fsGroup: 1001
+          runAsUser: 10000
+          runAsGroup: 10000
+          fsGroup: 10000
           fsGroupChangePolicy: OnRootMismatch
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
@@ -97,9 +97,9 @@ spec:
           reporting_enabled: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
         fsGroupChangePolicy: OnRootMismatch
       persistence:
         enabled: true
